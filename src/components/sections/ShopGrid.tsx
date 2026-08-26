@@ -24,19 +24,24 @@ export function ShopGrid() {
   const [showEngravingFor, setShowEngravingFor] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!sectionRef.current) return;
+
     const ctx = gsap.context(() => {
-      gsap.from(gridRef.current?.children || [], {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-          end: "top 20%",
-          scrub: 1,
-        },
-        opacity: 0,
-        y: 40,
-        stagger: 0.15,
-        ease: "power2.out",
-      });
+      const cardItems = Array.from(gridRef.current?.children || []).filter(Boolean);
+      if (cardItems.length > 0) {
+        gsap.from(cardItems, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 70%",
+            end: "top 20%",
+            scrub: 1,
+          },
+          opacity: 0,
+          y: 40,
+          stagger: 0.15,
+          ease: "power2.out",
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();

@@ -10,32 +10,40 @@ export function SustainabilitySection() {
   const metricsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(titleRef.current?.children || [], {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-          end: "top 30%",
-          scrub: 1,
-        },
-        opacity: 0,
-        y: 40,
-        stagger: 0.15,
-        ease: "power2.out",
-      });
+    if (!sectionRef.current) return;
 
-      gsap.from(metricsRef.current?.children || [], {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 50%",
-          end: "top 15%",
-          scrub: 1,
-        },
-        opacity: 0,
-        scale: 0.9,
-        stagger: 0.2,
-        ease: "power2.out",
-      });
+    const ctx = gsap.context(() => {
+      const titleItems = Array.from(titleRef.current?.children || []).filter(Boolean);
+      if (titleItems.length > 0) {
+        gsap.from(titleItems, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 70%",
+            end: "top 30%",
+            scrub: 1,
+          },
+          opacity: 0,
+          y: 40,
+          stagger: 0.15,
+          ease: "power2.out",
+        });
+      }
+
+      const metricItems = Array.from(metricsRef.current?.children || []).filter(Boolean);
+      if (metricItems.length > 0) {
+        gsap.from(metricItems, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 50%",
+            end: "top 15%",
+            scrub: 1,
+          },
+          opacity: 0,
+          scale: 0.9,
+          stagger: 0.2,
+          ease: "power2.out",
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();

@@ -12,19 +12,24 @@ export function PuritySection() {
   const [activeMineral, setActiveMineral] = useState(0);
 
   useEffect(() => {
+    if (!sectionRef.current) return;
+
     const ctx = gsap.context(() => {
-      gsap.from(contentRef.current?.children || [], {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-          end: "top 25%",
-          scrub: 1,
-        },
-        opacity: 0,
-        x: 50,
-        stagger: 0.15,
-        ease: "power2.out",
-      });
+      const contentItems = Array.from(contentRef.current?.children || []).filter(Boolean);
+      if (contentItems.length > 0) {
+        gsap.from(contentItems, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 70%",
+            end: "top 25%",
+            scrub: 1,
+          },
+          opacity: 0,
+          x: 50,
+          stagger: 0.15,
+          ease: "power2.out",
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();

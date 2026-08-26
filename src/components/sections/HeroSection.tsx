@@ -13,17 +13,24 @@ export function HeroSection() {
   const telemetryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!containerRef.current) return;
+
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ delay: 0.6 });
 
-      tl.from(telemetryRef.current, {
-        opacity: 0,
-        y: -15,
-        duration: 0.8,
-        ease: "power3.out",
-      })
-        .from(
-          headlineRef.current?.children || [],
+      if (telemetryRef.current) {
+        tl.from(telemetryRef.current, {
+          opacity: 0,
+          y: -15,
+          duration: 0.8,
+          ease: "power3.out",
+        });
+      }
+
+      const headlineItems = Array.from(headlineRef.current?.children || []).filter(Boolean);
+      if (headlineItems.length > 0) {
+        tl.from(
+          headlineItems,
           {
             opacity: 0,
             y: 40,
@@ -32,8 +39,11 @@ export function HeroSection() {
             ease: "power3.out",
           },
           "-=0.4"
-        )
-        .from(
+        );
+      }
+
+      if (subheadRef.current) {
+        tl.from(
           subheadRef.current,
           {
             opacity: 0,
@@ -42,8 +52,11 @@ export function HeroSection() {
             ease: "power3.out",
           },
           "-=0.5"
-        )
-        .from(
+        );
+      }
+
+      if (ctaRef.current) {
+        tl.from(
           ctaRef.current,
           {
             opacity: 0,
@@ -53,6 +66,7 @@ export function HeroSection() {
           },
           "-=0.5"
         );
+      }
     }, containerRef);
 
     return () => ctx.revert();

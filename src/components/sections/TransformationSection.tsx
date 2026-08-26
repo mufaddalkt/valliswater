@@ -10,32 +10,40 @@ export function TransformationSection() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(textRef.current?.children || [], {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-          end: "top 30%",
-          scrub: 1,
-        },
-        opacity: 0,
-        y: 30,
-        stagger: 0.15,
-        ease: "power2.out",
-      });
+    if (!sectionRef.current) return;
 
-      gsap.from(cardsRef.current?.children || [], {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 50%",
-          end: "top 15%",
-          scrub: 1,
-        },
-        opacity: 0,
-        scale: 0.95,
-        stagger: 0.2,
-        ease: "power2.out",
-      });
+    const ctx = gsap.context(() => {
+      const textItems = Array.from(textRef.current?.children || []).filter(Boolean);
+      if (textItems.length > 0) {
+        gsap.from(textItems, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 70%",
+            end: "top 30%",
+            scrub: 1,
+          },
+          opacity: 0,
+          y: 30,
+          stagger: 0.15,
+          ease: "power2.out",
+        });
+      }
+
+      const cardItems = Array.from(cardsRef.current?.children || []).filter(Boolean);
+      if (cardItems.length > 0) {
+        gsap.from(cardItems, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 50%",
+            end: "top 15%",
+            scrub: 1,
+          },
+          opacity: 0,
+          scale: 0.95,
+          stagger: 0.2,
+          ease: "power2.out",
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();

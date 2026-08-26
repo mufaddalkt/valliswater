@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from "react";
 import { gsap } from "@/lib/gsap-utils";
-import { Compass, Quote } from "lucide-react";
+import { Compass } from "lucide-react";
 
 export function EditorialPhilosophy() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -11,6 +11,8 @@ export function EditorialPhilosophy() {
   const bodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!sectionRef.current) return;
+
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -21,13 +23,17 @@ export function EditorialPhilosophy() {
         },
       });
 
-      tl.from(quote1Ref.current, {
-        opacity: 0,
-        y: 50,
-        duration: 1,
-        ease: "power3.out",
-      })
-        .from(
+      if (quote1Ref.current) {
+        tl.from(quote1Ref.current, {
+          opacity: 0,
+          y: 50,
+          duration: 1,
+          ease: "power3.out",
+        });
+      }
+
+      if (quote2Ref.current) {
+        tl.from(
           quote2Ref.current,
           {
             opacity: 0,
@@ -36,9 +42,13 @@ export function EditorialPhilosophy() {
             ease: "power3.out",
           },
           "+=0.2"
-        )
-        .from(
-          bodyRef.current?.children || [],
+        );
+      }
+
+      const bodyItems = Array.from(bodyRef.current?.children || []).filter(Boolean);
+      if (bodyItems.length > 0) {
+        tl.from(
+          bodyItems,
           {
             opacity: 0,
             y: 30,
@@ -48,6 +58,7 @@ export function EditorialPhilosophy() {
           },
           "-=0.4"
         );
+      }
     }, sectionRef);
 
     return () => ctx.revert();

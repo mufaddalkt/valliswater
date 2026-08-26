@@ -10,33 +10,40 @@ export function OriginSection() {
   const statsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Pinning & reveal animation
-      gsap.from(textGroupRef.current?.children || [], {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 75%",
-          end: "top 25%",
-          scrub: 1,
-        },
-        opacity: 0,
-        x: -50,
-        stagger: 0.15,
-        ease: "power2.out",
-      });
+    if (!sectionRef.current) return;
 
-      gsap.from(statsRef.current?.children || [], {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 60%",
-          end: "top 20%",
-          scrub: 1,
-        },
-        opacity: 0,
-        y: 40,
-        stagger: 0.2,
-        ease: "power2.out",
-      });
+    const ctx = gsap.context(() => {
+      const textItems = Array.from(textGroupRef.current?.children || []).filter(Boolean);
+      if (textItems.length > 0) {
+        gsap.from(textItems, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 75%",
+            end: "top 25%",
+            scrub: 1,
+          },
+          opacity: 0,
+          x: -50,
+          stagger: 0.15,
+          ease: "power2.out",
+        });
+      }
+
+      const statItems = Array.from(statsRef.current?.children || []).filter(Boolean);
+      if (statItems.length > 0) {
+        gsap.from(statItems, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 60%",
+            end: "top 20%",
+            scrub: 1,
+          },
+          opacity: 0,
+          y: 40,
+          stagger: 0.2,
+          ease: "power2.out",
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();

@@ -48,18 +48,15 @@ export function LuxuryBottle({ product, mousePos, isHovered }: LuxuryBottleProps
       ctx.textAlign = "center";
       ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
       ctx.font = "300 24px 'Plus Jakarta Sans', sans-serif";
-      ctx.letterSpacing = "6px";
       ctx.fillText("EST. 2026", 512, 290);
 
       // Brand Name
       ctx.font = "600 76px 'Italiana', 'Cormorant Garamond', serif";
-      ctx.letterSpacing = "16px";
       ctx.fillStyle = "#ffffff";
       ctx.fillText("VALLIS", 512, 380);
 
       // Subtitle
       ctx.font = "300 20px 'Plus Jakarta Sans', sans-serif";
-      ctx.letterSpacing = "8px";
       ctx.fillStyle = "rgba(210, 235, 248, 0.9)";
       ctx.fillText("ARTESIAN GLACIAL WATER", 512, 430);
 
@@ -72,30 +69,29 @@ export function LuxuryBottle({ product, mousePos, isHovered }: LuxuryBottleProps
 
       // Elevation & Purity telemetry
       ctx.font = "400 22px 'Space Grotesk', monospace";
-      ctx.letterSpacing = "4px";
       ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
       ctx.fillText("ALTITUDE 4,200 M", 512, 535);
 
       ctx.font = "300 18px 'Space Grotesk', monospace";
-      ctx.letterSpacing = "3px";
       ctx.fillStyle = "rgba(180, 220, 240, 0.75)";
       ctx.fillText("pH 7.88  ·  TDS 18 mg/L  ·  SILICA 48 mg", 512, 575);
 
       // Volume mark
       ctx.font = "600 28px 'Plus Jakarta Sans', sans-serif";
-      ctx.letterSpacing = "5px";
       ctx.fillStyle = "#ffffff";
       ctx.fillText(product.volume || "500 ML", 512, 660);
 
       ctx.font = "300 16px 'Plus Jakarta Sans', sans-serif";
-      ctx.letterSpacing = "4px";
       ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
       ctx.fillText("BOTTLED AT THE SOURCE · SWISS ALPS", 512, 710);
     }
 
     const texture = new THREE.CanvasTexture(canvas);
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.colorSpace = THREE.SRGBColorSpace;
     texture.needsUpdate = true;
-    texture.anisotropy = 16;
     return texture;
   }, [product.volume]);
 
@@ -221,17 +217,17 @@ export function LuxuryBottle({ product, mousePos, isHovered }: LuxuryBottleProps
     groupRef.current.rotation.x = THREE.MathUtils.lerp(
       groupRef.current.rotation.x,
       targetRotX,
-      delta * 3.5
+      Math.min(1, delta * 3.5)
     );
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
       targetRotY,
-      delta * 3.5
+      Math.min(1, delta * 3.5)
     );
     groupRef.current.position.y = THREE.MathUtils.lerp(
       groupRef.current.position.y,
       idleFloat,
-      delta * 3.5
+      Math.min(1, delta * 3.5)
     );
   });
 
@@ -321,13 +317,12 @@ export function LuxuryBottle({ product, mousePos, isHovered }: LuxuryBottleProps
       {dropletData.positions.map((pos, idx) => (
         <mesh key={idx} position={pos}>
           <sphereGeometry args={[dropletData.scales[idx], 12, 12]} />
-          <meshPhysicalMaterial
+          <meshStandardMaterial
             roughness={0.05}
-            transmission={0.95}
-            ior={1.33}
+            metalness={0.1}
             color="#ffffff"
             transparent
-            opacity={0.85}
+            opacity={0.8}
           />
         </mesh>
       ))}

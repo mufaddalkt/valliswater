@@ -24,9 +24,12 @@ function SceneManager({ mousePos, isHovered }: SceneManagerProps) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const mainEl = document.querySelector("main");
+    if (!mainEl) return;
+
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
-        trigger: "main",
+        trigger: mainEl,
         start: "top top",
         end: "bottom bottom",
         scrub: 1.2,
@@ -99,7 +102,7 @@ function SceneManager({ mousePos, isHovered }: SceneManagerProps) {
     }
 
     // Smooth lerp to targets
-    const lerpFactor = delta * 4.2;
+    const lerpFactor = Math.min(1, delta * 4.2);
     bottleGroupRef.current.position.x = THREE.MathUtils.lerp(
       bottleGroupRef.current.position.x,
       targetX,
@@ -183,7 +186,7 @@ export default function BottleCanvas() {
             toneMapping: THREE.ACESFilmicToneMapping,
             toneMappingExposure: 1.15,
           }}
-          shadows
+          shadows={{ type: THREE.PCFShadowMap }}
         >
           <SceneManager mousePos={mousePos} isHovered={isHovered} />
         </Canvas>

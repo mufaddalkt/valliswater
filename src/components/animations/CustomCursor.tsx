@@ -45,17 +45,28 @@ export function CustomCursor() {
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
 
-    // Smooth render loop with GSAP quickSetter
-    const setDotX = gsap.quickSetter(dotRef.current, "x", "px");
-    const setDotY = gsap.quickSetter(dotRef.current, "y", "px");
+    let setDotX: ((value: number) => void) | null = null;
+    let setDotY: ((value: number) => void) | null = null;
+
+    if (dotRef.current) {
+      setDotX = gsap.quickSetter(dotRef.current, "x", "px") as (value: number) => void;
+      setDotY = gsap.quickSetter(dotRef.current, "y", "px") as (value: number) => void;
+    }
 
     let reqId: number;
     const render = () => {
       pos.x += (mouse.x - pos.x) * 0.2;
       pos.y += (mouse.y - pos.y) * 0.2;
 
-      setDotX(mouse.x);
-      setDotY(mouse.y);
+      if (!setDotX && dotRef.current) {
+        setDotX = gsap.quickSetter(dotRef.current, "x", "px") as (value: number) => void;
+        setDotY = gsap.quickSetter(dotRef.current, "y", "px") as (value: number) => void;
+      }
+
+      if (setDotX && setDotY) {
+        setDotX(mouse.x);
+        setDotY(mouse.y);
+      }
 
       if (ringRef.current) {
         gsap.set(ringRef.current, {

@@ -27,13 +27,17 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
           },
         });
 
-        tl.to(counterRef.current, {
-          y: -20,
-          opacity: 0,
-          duration: 0.4,
-          ease: "power2.inOut",
-        })
-          .to(
+        if (counterRef.current) {
+          tl.to(counterRef.current, {
+            y: -20,
+            opacity: 0,
+            duration: 0.4,
+            ease: "power2.inOut",
+          });
+        }
+
+        if (logoRef.current) {
+          tl.to(
             logoRef.current,
             {
               scale: 0.95,
@@ -42,12 +46,16 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
               ease: "power2.inOut",
             },
             "-=0.2"
-          )
-          .to(containerRef.current, {
+          );
+        }
+
+        if (containerRef.current) {
+          tl.to(containerRef.current, {
             clipPath: "inset(0 0 100% 0)",
             duration: 0.7,
             ease: "power3.inOut",
           });
+        }
       } else {
         setProgress(current);
       }
