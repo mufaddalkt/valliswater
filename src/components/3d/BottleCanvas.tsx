@@ -9,6 +9,20 @@ import { StudioLighting } from "./StudioLighting";
 import { useCart } from "@/context/CartContext";
 import { gsap, ScrollTrigger } from "@/lib/gsap-utils";
 
+// Filter out internal Three.js Clock deprecation notice while R3F transitions to Timer
+if (typeof window !== "undefined") {
+  const originalWarn = console.warn;
+  console.warn = function (...args: unknown[]) {
+    if (
+      typeof args[0] === "string" &&
+      args[0].includes("THREE.Clock: This module has been deprecated")
+    ) {
+      return;
+    }
+    originalWarn.apply(console, args);
+  };
+}
+
 interface SceneManagerProps {
   mousePos: { x: number; y: number };
   isHovered: boolean;
@@ -185,6 +199,8 @@ export default function BottleCanvas() {
             powerPreference: "high-performance",
             toneMapping: THREE.ACESFilmicToneMapping,
             toneMappingExposure: 1.15,
+            depth: true,
+            stencil: false,
           }}
           shadows={{ type: THREE.PCFShadowMap }}
         >

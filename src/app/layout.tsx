@@ -9,22 +9,25 @@ import { CartDrawer } from "@/components/ui/CartDrawer";
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   variable: "--font-serif",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "600"],
   display: "swap",
+  preload: false,
 });
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["200", "300", "400", "500", "600", "700"],
+  weight: ["300", "400", "600"],
   display: "swap",
+  preload: false,
 });
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-mono",
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500"],
   display: "swap",
+  preload: false,
 });
 
 export const viewport: Viewport = {

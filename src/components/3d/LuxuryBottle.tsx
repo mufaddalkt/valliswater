@@ -11,6 +11,91 @@ interface LuxuryBottleProps {
   isHovered: boolean;
 }
 
+// Cached textures to avoid on-the-fly allocations
+const labelTextureCache = new Map<string, THREE.CanvasTexture>();
+
+function getOrCreateLabelTexture(volume: string): THREE.CanvasTexture | null {
+  if (typeof window === "undefined") return null;
+
+  if (labelTextureCache.has(volume)) {
+    return labelTextureCache.get(volume)!;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 1024;
+  const ctx = canvas.getContext("2d");
+
+  if (ctx) {
+    ctx.clearRect(0, 0, 1024, 1024);
+
+    // Subtle frosted label background
+    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.fillRect(160, 200, 704, 624);
+
+    // Border outline - ultra fine luxury stroke
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(170, 210, 684, 604);
+
+    // Inner decorative hairline
+    ctx.strokeStyle = "rgba(180, 220, 240, 0.5)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(185, 225, 654, 574);
+
+    // Brand Monogram Seal
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+    ctx.font = "300 24px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillText("EST. 2026", 512, 290);
+
+    // Brand Name
+    ctx.font = "600 76px 'Italiana', 'Cormorant Garamond', serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("VALLIS", 512, 380);
+
+    // Subtitle
+    ctx.font = "300 20px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillStyle = "rgba(210, 235, 248, 0.9)";
+    ctx.fillText("ARTESIAN GLACIAL WATER", 512, 430);
+
+    // Divider line
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.beginPath();
+    ctx.moveTo(340, 480);
+    ctx.lineTo(684, 480);
+    ctx.stroke();
+
+    // Elevation & Purity telemetry
+    ctx.font = "400 22px 'Space Grotesk', monospace";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.fillText("ALTITUDE 4,200 M", 512, 535);
+
+    ctx.font = "300 18px 'Space Grotesk', monospace";
+    ctx.fillStyle = "rgba(180, 220, 240, 0.75)";
+    ctx.fillText("pH 7.88  ·  TDS 18 mg/L  ·  SILICA 48 mg", 512, 575);
+
+    // Volume mark
+    ctx.font = "600 28px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(volume || "500 ML", 512, 660);
+
+    ctx.font = "300 16px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+    ctx.fillText("BOTTLED AT THE SOURCE · SWISS ALPS", 512, 710);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.generateMipmaps = false;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+
+  labelTextureCache.set(volume, texture);
+  return texture;
+}
+
 export function LuxuryBottle({ product, mousePos, isHovered }: LuxuryBottleProps) {
   const groupRef = useRef<THREE.Group>(null);
   const bottleMeshRef = useRef<THREE.Mesh>(null);
@@ -18,81 +103,8 @@ export function LuxuryBottle({ product, mousePos, isHovered }: LuxuryBottleProps
   const capMeshRef = useRef<THREE.Mesh>(null);
   const labelMeshRef = useRef<THREE.Mesh>(null);
 
-  // Generate dynamic luxury label texture using offscreen canvas
   const labelTexture = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    const canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = 1024;
-    const ctx = canvas.getContext("2d");
-
-    if (ctx) {
-      // Clear transparent
-      ctx.clearRect(0, 0, 1024, 1024);
-
-      // Subtle frosted label background
-      ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-      ctx.fillRect(160, 200, 704, 624);
-
-      // Border outline - ultra fine luxury stroke
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(170, 210, 684, 604);
-
-      // Inner decorative hairline
-      ctx.strokeStyle = "rgba(180, 220, 240, 0.5)";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(185, 225, 654, 574);
-
-      // Brand Monogram Seal
-      ctx.textAlign = "center";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-      ctx.font = "300 24px 'Plus Jakarta Sans', sans-serif";
-      ctx.fillText("EST. 2026", 512, 290);
-
-      // Brand Name
-      ctx.font = "600 76px 'Italiana', 'Cormorant Garamond', serif";
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText("VALLIS", 512, 380);
-
-      // Subtitle
-      ctx.font = "300 20px 'Plus Jakarta Sans', sans-serif";
-      ctx.fillStyle = "rgba(210, 235, 248, 0.9)";
-      ctx.fillText("ARTESIAN GLACIAL WATER", 512, 430);
-
-      // Divider line
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-      ctx.beginPath();
-      ctx.moveTo(340, 480);
-      ctx.lineTo(684, 480);
-      ctx.stroke();
-
-      // Elevation & Purity telemetry
-      ctx.font = "400 22px 'Space Grotesk', monospace";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-      ctx.fillText("ALTITUDE 4,200 M", 512, 535);
-
-      ctx.font = "300 18px 'Space Grotesk', monospace";
-      ctx.fillStyle = "rgba(180, 220, 240, 0.75)";
-      ctx.fillText("pH 7.88  ·  TDS 18 mg/L  ·  SILICA 48 mg", 512, 575);
-
-      // Volume mark
-      ctx.font = "600 28px 'Plus Jakarta Sans', sans-serif";
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText(product.volume || "500 ML", 512, 660);
-
-      ctx.font = "300 16px 'Plus Jakarta Sans', sans-serif";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-      ctx.fillText("BOTTLED AT THE SOURCE · SWISS ALPS", 512, 710);
-    }
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.generateMipmaps = false;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.needsUpdate = true;
-    return texture;
+    return getOrCreateLabelTexture(product.volume);
   }, [product.volume]);
 
   // Construct procedural lathe points for realistic glass silhouette
@@ -233,7 +245,7 @@ export function LuxuryBottle({ product, mousePos, isHovered }: LuxuryBottleProps
 
   return (
     <group ref={groupRef} dispose={null}>
-      {/* 1. Procedural Flint Glass Outer Shell */}
+      {/* 1. Procedural Optical Flint Glass Shell */}
       <mesh
         ref={bottleMeshRef}
         geometry={glassGeometry}
@@ -241,33 +253,27 @@ export function LuxuryBottle({ product, mousePos, isHovered }: LuxuryBottleProps
         receiveShadow
       >
         <meshPhysicalMaterial
-          roughness={0.03}
-          transmission={0.97}
-          thickness={1.4}
-          ior={1.52}
-          reflectivity={0.9}
+          roughness={0.04}
+          metalness={0.02}
+          reflectivity={0.92}
           clearcoat={1.0}
           clearcoatRoughness={0.03}
-          attenuationColor="#e2f5fc"
-          attenuationDistance={2.4}
           color="#ffffff"
           transparent
-          opacity={1.0}
+          opacity={0.84}
+          depthWrite={true}
         />
       </mesh>
 
       {/* 2. Pure Artesian Glacial Fluid Mesh */}
       <mesh ref={fluidMeshRef} geometry={fluidGeometry}>
-        <meshPhysicalMaterial
-          roughness={0.01}
-          transmission={0.98}
-          thickness={0.8}
-          ior={1.333}
-          color={product.sparkling ? "#dcf5fc" : "#eef8fc"}
-          attenuationColor="#b2e2f8"
-          attenuationDistance={1.8}
+        <meshStandardMaterial
+          roughness={0.02}
+          metalness={0.05}
+          color={product.sparkling ? "#d0f0fa" : "#e4f6fc"}
           transparent
-          opacity={0.92}
+          opacity={0.78}
+          depthWrite={false}
         />
       </mesh>
 
